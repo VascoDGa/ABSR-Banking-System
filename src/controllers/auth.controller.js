@@ -16,12 +16,25 @@ export const signUp = asyncHandler(async(req,res) => {
     if(existingUser) {
         throw new Error("User already exists")
     }
+    let accNo  = ""
+    for(let i = 0 ; i < 4 ; i++) {
+        let randNo = Math.floor(Math.random() * 26)
+        accNo = accNo + String.fromCharCode(65 + randNo)
+    }
+    for(let i = 0 ; i < 8 ; i++) {
+        let randNo = Math.floor(Math.random() * 10)
+        accNo = accNo +  Number.toString(randNo)
+    }
     const newUser = await Customer.create({
         name,
         email,
         phNo : phno,
         address,
-        age
+        age,
+    })
+
+    const newAccount = await Account.create({
+        accNum : accNo
     })
 
     const token = newUser.getJWTtoken()
@@ -31,7 +44,8 @@ export const signUp = asyncHandler(async(req,res) => {
     res.status(200).json({
         success : true,
         token,
-        newUser
+        newUser,
+        newAccount
     })
 })
 
@@ -79,3 +93,15 @@ export const getProfile = asyncHandler(async(req , res) => {
     })
 })
 
+export const changePassword = asyncHandler(async(req , res) => {
+    const {accno, pin, updatedPin} = req.body
+    if(!pin) {
+        console.error("Please enter valid pin")
+    }
+    const findUser = await Account.findOneAndUpdate({accNum : `${accno}`, pin : `${pin}` } , { pin : `${updatedPin}`} )
+    await findUser.save()
+    res.status(200).json({
+        success : true,
+        findUser
+    })
+})
