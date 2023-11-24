@@ -1,5 +1,5 @@
-import Account from '../models/account.schema'
-import asyncHandler from '../services/asyncHandler'
+import Account from '../models/account.schema.js'
+import asyncHandler from '../services/asyncHandler.js'
 
 export const createAccount = asyncHandler(async(req , res) => {
     let {phno} = req.body
@@ -34,6 +34,7 @@ export const getAccountDetails = asyncHandler(async(req, res) => {
     }
 
     res.status(200).json({
+        success : true,
         user
     })
 })

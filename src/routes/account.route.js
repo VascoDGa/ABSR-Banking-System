@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createAccount, getAccountDetails } from "../controllers/account.controller";
+import { createAccount, getAccountDetails } from "../controllers/account.controller.js";
 
 const route = Router()
 

@@ -1,5 +1,5 @@
-import Transaction from '../models/transaction.schema'
-import asyncHandler from '../services/asyncHandler'
+import Transaction from '../models/transaction.schema.js'
+import asyncHandler from '../services/asyncHandler.js'
 
 export const newTransactionDetails = asyncHandler(async(req, res) => {
     const {amount, accId} = req.body
@@ -12,6 +12,7 @@ export const newTransactionDetails = asyncHandler(async(req, res) => {
         amount
     })
     res.status(200).json({
+        success : true,
         newTransaction
     })
 })

@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import JWT from 'jsonwebtoken'
+import config from '../config/index.js'
 
 const customerDetails = new mongoose.Schema({
     name : {
@@ -28,5 +30,11 @@ const customerDetails = new mongoose.Schema({
         default : 1234
     }
 }, {timestamps : true})
+
+customerDetails.methods = {
+    getJWTToken : function() {
+        JWT.sign({_id: this._id}, config.JWT_SECRET, {expiresIn : config.JWT_EXPIRY})
+    }
+}
 
 export default mongoose.model("Customer" , customerDetails)

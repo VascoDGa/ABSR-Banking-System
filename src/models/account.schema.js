@@ -15,7 +15,8 @@ const accountDetails = new mongoose.Schema({
         type : String
     },
     balance : {
-        type : Number
+        type : Number,
+        default : 0
     }
 } , {timestamps : true})
 

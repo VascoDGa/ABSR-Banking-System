@@ -15,14 +15,21 @@ app.use(cors())
 app.use(cookieParser())
 app.use(bodyParser.json())
 
-app.use('/api/v1/' , routes)
+app.use('/api/v1' , routes)
 
-app.all('*', (_req , res) => {
-    return res.status(404).json({
-        success : false,
-        message : "Route not found"
-    })
-})
+app.use((req, res, next) => {  //http:localhost:4000/api/v1/
+    // Check if the route is not found
+    if (!res.headersSent) {
+      return res.status(404).json({
+        success: false,
+        message: "Route not found"
+      });
+    }
+  
+    // Proceed to the next middleware or error handler
+    next();
+  });
+  
 
 
 (
@@ -46,3 +53,5 @@ app.all('*', (_req , res) => {
         }
     }
 )()
+
+
