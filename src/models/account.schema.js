@@ -6,7 +6,8 @@ const accountDetails = new mongoose.Schema({
     },
     custId : {
         type : mongoose.Schema.Types.ObjectId,
-        ref : "Customer"
+        ref : "Customer",
+        required : true
     },
     accType : {
         type : String

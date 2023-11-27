@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createAccount, getAccountDetails , newDeposit , newWithdrawal } from "../controllers/account.controller.js";
+import { newDeposit , newWithdrawal } from "../controllers/account.controller.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 
 const route = Router()

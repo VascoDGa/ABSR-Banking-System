@@ -1,6 +1,7 @@
 import Customer from '../models/customer.schema.js'
 import asyncHandler from "../services/asyncHandler.js";
 import Account from '../models/account.schema.js'
+import {ObjectId} from 'mongodb'
 
 export const cookieOptions = {
     expires : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
@@ -12,18 +13,20 @@ export const signUp = asyncHandler(async(req,res) => {
     if(!name || !email || !phno) {
         throw new Error("Please enter valid credentials")
     }
-    const existingUser = await Customer.findOne({phno})
+    const existingUser = await Customer.findOne({phNo:`${phno}`})
     if(existingUser) {
         throw new Error("User already exists")
     }
     let accNo  = ""
+    
+    
     for(let i = 0 ; i < 4 ; i++) {
         let randNo = Math.floor(Math.random() * 26)
         accNo = accNo + String.fromCharCode(65 + randNo)
     }
     for(let i = 0 ; i < 8 ; i++) {
         let randNo = Math.floor(Math.random() * 10)
-        accNo = accNo +  Number.toString(randNo)
+        accNo += Number(randNo);
     }
     const newUser = await Customer.create({
         name,
@@ -32,12 +35,15 @@ export const signUp = asyncHandler(async(req,res) => {
         address,
         age,
     })
+    const cust = await Customer.findOne({phNo:phno})
+    const custId = cust._id
 
     const newAccount = await Account.create({
-        accNum : accNo
+        accNum : `${accNo}`,
+        custId
     })
 
-    const token = newUser.getJWTtoken()
+    const token = cust.getJWTToken()
 
     res.cookie("token", token , cookieOptions)
 
@@ -50,22 +56,26 @@ export const signUp = asyncHandler(async(req,res) => {
 })
 
 export const logIn = asyncHandler( async(req , res) => {
-    const {accNo , phno} = req.body;
-    if(!name || !phno)
+    const {accNo , pin} = req.body;
+    if(!accNo || !pin)
         throw new Error("Enter valid credentials")
-    const checkUser = await Customer.findOne({phno})
-    if(!checkUser){
+    const checkUser = await Account.findOne({accNum:accNo})
+    //const validCred = checkUser.pin === pin
+    const custId = checkUser.custId
+    const customer = await Customer.findById(custId)
+    //const checkpin = customer.pin === pin
+    if(!(customer.pin == pin)){
         return res.status(400).json({
             success: false,
             message : "User does not exist"
         })
     }
-    const token = checkUser.getJWTtoken()
+    const token = customer.getJWTToken()
     res.cookie("token", token , cookieOptions)
-    res.send(200).json({
+    res.status(200).json({
         success : true,
         token,
-        checkUser
+        customer
     })
 })
 
@@ -81,16 +91,22 @@ export const logOut = asyncHandler(async( req, res) => {
 })
 
 export const getProfile = asyncHandler(async(req , res) => {
-    const {user} = req;
-
-    if(!user) {
-        console.error("User not found")
+    const {custId} = req.body;
+    try {
+        const user = await Customer.findById(custId)
+        if(!user) {
+            throw new Error("User not found")
+        }
+        const accNo = await Account.findOne({ custId : `${custId}`})
+        res.status(200).json({
+            success : true,
+            user,
+            accNo
+        })
     }
-
-    res.status(200).json({
-        success : true,
-        user
-    })
+    catch(err) {
+        console.error(err)
+    }
 })
 
 export const changePassword = asyncHandler(async(req , res) => {
@@ -99,7 +115,7 @@ export const changePassword = asyncHandler(async(req , res) => {
         console.error("Please enter valid pin")
     }
     const findUser = await Account.findOneAndUpdate({accNum : `${accno}`, pin : `${pin}` } , { pin : `${updatedPin}`} )
-    await findUser.save()
+    // await findUser.save()
     res.status(200).json({
         success : true,
         findUser

@@ -22,9 +22,9 @@ const customerDetails = new mongoose.Schema({
         type : String,
         required : [true, "Address is required"]
     },
-    custId : {
-        type : Number
-    },
+    // custId : {
+    //     type : Number
+    // },
     pin : {
         type : Number,
         default : 1234
