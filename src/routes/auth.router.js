@@ -9,7 +9,7 @@ route.post('/login', logIn)
 route.get('/logout', logOut)
 route.post('/changePIN', changePassword)
 
-route.post('/profile', getProfile)
+route.post('/profile', isLoggedIn ,  getProfile)
 
 export default route
 

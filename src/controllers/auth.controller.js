@@ -59,8 +59,11 @@ export const logIn = asyncHandler( async(req , res) => {
     const {accNo , pin} = req.body;
     if(!accNo || !pin)
         throw new Error("Enter valid credentials")
-    const checkUser = await Account.findOne({accNum:accNo})
+    const checkUser = await Account.findOne({accNum: `${accNo}`})
     //const validCred = checkUser.pin === pin
+    if(!checkUser) {
+        throw new Error("Could not find user")
+    }
     const custId = checkUser.custId
     const customer = await Customer.findById(custId)
     //const checkpin = customer.pin === pin
@@ -93,9 +96,18 @@ export const logOut = asyncHandler(async( req, res) => {
 export const getProfile = asyncHandler(async(req , res) => {
     const {custId} = req.body;
     try {
+        if(!custId) {
+            return res.status(404).json({
+                success : "false",
+                message : "Please enter customer ID"
+            })
+        }
         const user = await Customer.findById(custId)
         if(!user) {
-            throw new Error("User not found")
+            return res.status(404).json({
+                success : "false",
+                message : "User does not exist in database"
+            })
         }
         const accNo = await Account.findOne({ custId : `${custId}`})
         res.status(200).json({
@@ -114,10 +126,24 @@ export const changePassword = asyncHandler(async(req , res) => {
     if(!pin) {
         console.error("Please enter valid pin")
     }
-    const findUser = await Account.findOneAndUpdate({accNum : `${accno}`, pin : `${pin}` } , { pin : `${updatedPin}`} )
+    const findUser = await Account.findOne({accNum : `${accno}`})
+    if(!findUser.pin === pin || !findUser) {
+        return res.status(404).json({
+            success : "false",
+            message : "Wrong PIN"
+        })
+    }
+    const customerID = findUser.custId
+    const checkUser = await Customer.findById(customerID)
+    if(!checkUser) {
+        return res.status(404).json({
+            success : "false",
+            message : "Account not found"
+        })
+    }
+    const updatedPIN  = await checkUser.updateOne({ pin : `${updatedPin}`})
     // await findUser.save()
     res.status(200).json({
-        success : true,
-        findUser
+        success : true
     })
 })

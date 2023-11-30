@@ -33,7 +33,7 @@ const customerDetails = new mongoose.Schema({
 
 customerDetails.methods = {
     getJWTToken : function() {
-        JWT.sign({_id: this._id}, config.JWT_SECRET, {expiresIn : config.JWT_EXPIRY})
+        return JWT.sign({_id: this._id}, config.JWT_SECRET, {expiresIn : config.JWT_EXPIRY})
     }
 }
 

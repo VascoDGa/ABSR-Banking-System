@@ -11,7 +11,10 @@ export const isLoggedIn = asyncHandler(async(req, res, next) => {
     }
 
     if(!token) {
-        console.error("Sorry, could not enter")
+        return res.status(404).json({
+            success : "false",
+            message : "Sorry, could not enter"
+        })
     }
 
     try {
